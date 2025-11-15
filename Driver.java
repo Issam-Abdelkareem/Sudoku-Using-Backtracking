@@ -37,21 +37,22 @@ public class Driver extends Application {
     private Button checkResultBtn = new Button("Check Result");
     Button eraseBtn = new Button("Erase All Attempts");
 
-    Image image = new Image("C:\\Users\\issam\\Downloads\\questionn.png");
-    ImageView question = new ImageView(image);
-    Image checkImage = new Image("C:\\Users\\issam\\Downloads\\checked.png");
-    ImageView check = new ImageView(checkImage);
+    ImageView question;
+    ImageView check;
     public CheckBox cellHighlightBox = new CheckBox("");
 
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        // Initialize ImageViews
+        question = new ImageView(loadImageSafe("resources/question.png"));
+        check = new ImageView(loadImageSafe("resources/checked.png"));
         openFileScreen();
     }
 
     public void openFileScreen() {
-        primaryStage.getIcons().add(new Image("C:\\Users\\issam\\Downloads\\file.png"));
+        primaryStage.getIcons().add(loadImageSafe("resources/file.png"));
         Label titleLabel = new Label("Sudoku");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Comic Sans MS';");
         titleLabel.setAlignment(Pos.CENTER);
@@ -97,7 +98,7 @@ public class Driver extends Application {
 
     public void openSudokuStage() {
         primaryStage.getIcons().clear();
-        primaryStage.getIcons().add(new Image("C:\\Users\\issam\\Downloads\\sudokuu.png"));
+        primaryStage.getIcons().add(loadImageSafe("resources/sudoku.png"));
         primaryStage.setTitle("Sudoku BackTracking");
         glow(checkResultBtn);
         glow(solveBtn);
@@ -121,9 +122,8 @@ public class Driver extends Application {
         hintBox.getChildren().addAll(highlightLabel, cellHighlightBox);
 
         backBtn.setOnAction(e -> openFileScreen());
-        String imagePath = "file:C:/Users/issam/Downloads/backk.png";
-        Image image = new Image(imagePath);
-        ImageView imageView = new ImageView(image);
+        Image backImage = loadImageSafe("resources/back.png");
+        ImageView imageView = new ImageView(backImage);
         imageView.setFitWidth(40);
         imageView.setFitHeight(40);
         backBtn.setGraphic(imageView);
@@ -294,7 +294,7 @@ public class Driver extends Application {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setHeaderText(null);
                 alert.setContentText("Correct Sudoku Solution, You Won");
-                Image image2 = new Image("C:\\Users\\issam\\Downloads\\check.png");
+                Image image2 = loadImageSafe("resources/check.png");
                 ImageView imgView = new ImageView(image2);
                 imgView.setFitWidth(50);
                 imgView.setFitHeight(50);
@@ -394,6 +394,44 @@ public class Driver extends Application {
         }
     }
 
+
+    /**
+     * Safely loads an image from the given path.
+     * If the image cannot be loaded, returns a transparent 1x1 image as fallback.
+     * This prevents the application from crashing due to missing image files.
+     *
+     * @param path the relative or absolute path to the image file
+     * @return the loaded Image, or a transparent fallback image if loading fails
+     */
+    private Image loadImageSafe(String path) {
+        try {
+            // Try to load from resources first
+            if (getClass().getClassLoader().getResource(path) != null) {
+                return new Image(getClass().getClassLoader().getResource(path).toExternalForm());
+            }
+            // Try to load as file path
+            File file = new File(path);
+            if (file.exists()) {
+                return new Image(file.toURI().toString());
+            }
+            // If file doesn't exist, log and return fallback
+            System.err.println("Warning: Image not found at path: " + path + ". Using fallback.");
+            return createFallbackImage();
+        } catch (Exception e) {
+            System.err.println("Error loading image from path: " + path + ". Using fallback. Error: " + e.getMessage());
+            return createFallbackImage();
+        }
+    }
+
+    /**
+     * Creates a transparent 1x1 fallback image.
+     *
+     * @return a transparent Image
+     */
+    private Image createFallbackImage() {
+        // Create a simple transparent 1x1 image as fallback
+        return new Image("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -524,7 +562,7 @@ public class Driver extends Application {
         //the grid is built by using a grid pane of subGridPanes
         Stage solvedStage = new Stage();
         solvedStage.setTitle("Solution");
-        solvedStage.getIcons().add(new Image("C:\\Users\\issam\\Downloads\\check.png"));
+        solvedStage.getIcons().add(loadImageSafe("resources/check.png"));
 
         GridPane mainGrid = new GridPane();
         mainGrid.setAlignment(Pos.CENTER);
@@ -584,7 +622,6 @@ public class Driver extends Application {
 
         Scene solvedScene = new Scene(sudokuBox, 500, 550);
         solvedStage.setScene(solvedScene);
-        solvedStage.getIcons().add(new Image("C:\\Users\\issam\\Downloads\\check.png"));
         solvedStage.show();
     }
 
